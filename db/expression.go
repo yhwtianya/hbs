@@ -2,11 +2,13 @@ package db
 
 import (
 	"fmt"
-	"github.com/open-falcon/common/model"
 	"log"
 	"strings"
+
+	"github.com/open-falcon/common/model"
 )
 
+// 查询所有生效中的expression
 func QueryExpressions() (ret []*model.Expression, err error) {
 	sql := "select id, expression, func, op, right_value, max_step, priority, note, action_id from expression where action_id>0 and pause=0"
 	rows, err := DB.Query(sql)
@@ -48,6 +50,7 @@ func QueryExpressions() (ret []*model.Expression, err error) {
 	return ret, nil
 }
 
+// 解析expression为metric和tags
 func parseExpression(exp string) (metric string, tags map[string]string, err error) {
 	left := strings.Index(exp, "(")
 	right := strings.Index(exp, ")")

@@ -2,15 +2,17 @@ package rpc
 
 import (
 	"bytes"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/open-falcon/common/model"
 	"github.com/open-falcon/common/utils"
 	"github.com/open-falcon/hbs/cache"
 	"github.com/open-falcon/hbs/g"
-	"sort"
-	"strings"
-	"time"
 )
 
+// 获取agent的插件信息，agent调用
 func (t *Agent) MinePlugins(args model.AgentHeartbeatRequest, reply *model.AgentPluginsResponse) error {
 	if args.Hostname == "" {
 		return nil
@@ -22,12 +24,14 @@ func (t *Agent) MinePlugins(args model.AgentHeartbeatRequest, reply *model.Agent
 	return nil
 }
 
+// agent上报自身版本等信息
 func (t *Agent) ReportStatus(args *model.AgentReportRequest, reply *model.SimpleRpcResponse) error {
 	if args.Hostname == "" {
 		reply.Code = 1
 		return nil
 	}
 
+	// 保存到Agent缓存
 	cache.Agents.Put(args)
 
 	return nil
@@ -39,6 +43,7 @@ func (t *Agent) TrustableIps(args *model.NullRpcRequest, ips *string) error {
 	return nil
 }
 
+// agent获取策略涉及到的内置监测指标，url、port、procs、du四类监测指标
 // agent按照server端的配置，按需采集的metric，比如net.port.listen port=22 或者 proc.num name=zabbix_agentd
 func (t *Agent) BuiltinMetrics(args *model.AgentHeartbeatRequest, reply *model.BuiltinMetricResponse) error {
 	if args.Hostname == "" {
@@ -66,6 +71,7 @@ func (t *Agent) BuiltinMetrics(args *model.AgentHeartbeatRequest, reply *model.B
 	return nil
 }
 
+// 计算内置指标md5，用于和agent已存在的内置指标对比
 func DigestBuiltinMetrics(items []*model.BuiltinMetric) string {
 	sort.Sort(model.BuiltinMetricSlice(items))
 

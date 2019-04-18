@@ -2,16 +2,19 @@ package rpc
 
 import (
 	"fmt"
+
 	"github.com/open-falcon/common/model"
 	"github.com/open-falcon/common/utils"
 	"github.com/open-falcon/hbs/cache"
 )
 
+// 获取所有expression, judge调用
 func (t *Hbs) GetExpressions(req model.NullRpcRequest, reply *model.ExpressionResponse) error {
 	reply.Expressions = cache.ExpressionCache.Get()
 	return nil
 }
 
+// 获取所有hostname及其对应的Strategy，judge调用
 func (t *Hbs) GetStrategies(req model.NullRpcRequest, reply *model.StrategiesResponse) error {
 	reply.HostStrategies = []*model.HostStrategy{}
 	// 一个机器ID对应多个模板ID
@@ -69,6 +72,7 @@ func (t *Hbs) GetStrategies(req model.NullRpcRequest, reply *model.StrategiesRes
 	return nil
 }
 
+// 转换Strategy为template id和Strategy映射关系，方便通过template id查询Strategy
 func Tpl2Strategies(strategies map[int]*model.Strategy) map[int][]*model.Strategy {
 	ret := make(map[int][]*model.Strategy)
 	for _, s := range strategies {
@@ -84,6 +88,7 @@ func Tpl2Strategies(strategies map[int]*model.Strategy) map[int][]*model.Strateg
 	return ret
 }
 
+// 根据主机关联的tids，获取其关联的所有Strategy
 func CalcInheritStrategies(allTpls map[int]*model.Template, tids []int, tpl2Strategies map[int][]*model.Strategy) []model.Strategy {
 	// 根据模板的继承关系，找到每个机器对应的模板全量
 	/**
@@ -110,6 +115,8 @@ func CalcInheritStrategies(allTpls map[int]*model.Template, tids []int, tpl2Stra
 	 * |c |  |  |
 	 * |  |  |  |
 	 */
+
+	// 如果tpl_buckets的某索引对应的集合是另外一个索引对应的集合的子集，则保存到uniq_tpl_buckets
 	uniq_tpl_buckets := [][]int{}
 	for i := 0; i < len(tpl_buckets); i++ {
 		var valid bool = true
@@ -182,6 +189,7 @@ func CalcInheritStrategies(allTpls map[int]*model.Template, tids []int, tpl2Stra
 	return strategies
 }
 
+// 判断target是否在list里
 func slice_int_contains(list []int, target int) bool {
 	for _, b := range list {
 		if b == target {
@@ -191,6 +199,7 @@ func slice_int_contains(list []int, target int) bool {
 	return false
 }
 
+// 判断是否完全相等
 func slice_int_eq(a []int, b []int) bool {
 	if len(a) != len(b) {
 		return false
@@ -203,6 +212,7 @@ func slice_int_eq(a []int, b []int) bool {
 	return true
 }
 
+// 判断a的元素是否全在b里
 func slice_int_lt(a []int, b []int) bool {
 	for _, i := range a {
 		if !slice_int_contains(b, i) {

@@ -2,11 +2,13 @@ package db
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/open-falcon/common/model"
 	"github.com/open-falcon/hbs/g"
-	"log"
 )
 
+// 将agent上报的自身信息保存到数据
 func UpdateAgent(agentInfo *model.AgentUpdateInfo) {
 	sql := ""
 	if g.Config().Hosts == "" {

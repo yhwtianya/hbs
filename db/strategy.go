@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
-	"github.com/open-falcon/common/model"
-	"github.com/toolkits/container/set"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/open-falcon/common/model"
+	"github.com/toolkits/container/set"
 )
 
 // 获取所有的Strategy列表
@@ -18,6 +19,7 @@ func QueryStrategies(tpls map[int]*model.Template) (map[int]*model.Strategy, err
 	}
 
 	now := time.Now().Format("15:04")
+	// 获取所有当前生效的strategy
 	sql := fmt.Sprintf(
 		"select %s from strategy as s where (s.run_begin='' and s.run_end='') or (s.run_begin <= '%s' and s.run_end > '%s')",
 		"s.id, s.metric, s.tags, s.func, s.op, s.right_value, s.max_step, s.priority, s.note, s.tpl_id",
@@ -69,12 +71,14 @@ func QueryStrategies(tpls map[int]*model.Template) (map[int]*model.Strategy, err
 	return ret, nil
 }
 
+// 内置指标包括必监控指标和需配置策略才监控的指标，这里获取策略里涉及到的内置指标
 func QueryBuiltinMetrics(tids string) ([]*model.BuiltinMetric, error) {
 	sql := fmt.Sprintf(
 		"select metric, tags from strategy where tpl_id in (%s) and metric in ('net.port.listen', 'proc.num', 'du.bs', 'url.check.health')",
 		tids,
 	)
 
+	// 记录所有BuiltinMetric
 	ret := []*model.BuiltinMetric{}
 
 	rows, err := DB.Query(sql)
@@ -83,6 +87,7 @@ func QueryBuiltinMetrics(tids string) ([]*model.BuiltinMetric, error) {
 		return ret, err
 	}
 
+	// 记录tags，存在相同的tag时，即为重复的BuiltinMetric，不再保存到BuiltinMetric
 	metricTagsSet := set.NewStringSet()
 
 	defer rows.Close()
@@ -96,6 +101,7 @@ func QueryBuiltinMetrics(tids string) ([]*model.BuiltinMetric, error) {
 
 		k := fmt.Sprintf("%s%s", builtinMetric.Metric, builtinMetric.Tags)
 		if metricTagsSet.Exists(k) {
+			// 通过tag去重
 			continue
 		}
 

@@ -1,9 +1,10 @@
 package cache
 
 import (
+	"sync"
+
 	"github.com/open-falcon/common/model"
 	"github.com/open-falcon/hbs/db"
-	"sync"
 )
 
 type SafeExpressionCache struct {
@@ -11,14 +12,17 @@ type SafeExpressionCache struct {
 	L []*model.Expression
 }
 
+// 保存所有生效中的Expressions
 var ExpressionCache = &SafeExpressionCache{}
 
+// 获取所有生效中的Expressions
 func (this *SafeExpressionCache) Get() []*model.Expression {
 	this.RLock()
 	defer this.RUnlock()
 	return this.L
 }
 
+// 从数据库获取所有生效中的Expressions
 func (this *SafeExpressionCache) Init() {
 	es, err := db.QueryExpressions()
 	if err != nil {

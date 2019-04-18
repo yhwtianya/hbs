@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// 周期性用数据库数据更新缓存数据
 func Init() {
 	log.Println("cache begin")
 
@@ -41,6 +42,7 @@ func Init() {
 
 }
 
+// 周期性用数据库数据更新缓存数据
 func LoopInit() {
 	for {
 		time.Sleep(time.Minute)

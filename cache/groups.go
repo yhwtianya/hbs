@@ -1,8 +1,9 @@
 package cache
 
 import (
-	"github.com/open-falcon/hbs/db"
 	"sync"
+
+	"github.com/open-falcon/hbs/db"
 )
 
 // 一个机器可能在多个group下，做一个map缓存hostid与groupid的对应关系
@@ -11,8 +12,10 @@ type SafeHostGroupsMap struct {
 	M map[int][]int
 }
 
+// 保存所有host id和group id对应关系
 var HostGroupsMap = &SafeHostGroupsMap{M: make(map[int][]int)}
 
+// 根据host id获取group id
 func (this *SafeHostGroupsMap) GetGroupIds(hid int) ([]int, bool) {
 	this.RLock()
 	defer this.RUnlock()
@@ -20,6 +23,7 @@ func (this *SafeHostGroupsMap) GetGroupIds(hid int) ([]int, bool) {
 	return gids, exists
 }
 
+// 从数据库获取所有host id和group id对应关系
 func (this *SafeHostGroupsMap) Init() {
 	m, err := db.QueryHostGroups()
 	if err != nil {

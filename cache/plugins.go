@@ -1,9 +1,10 @@
 package cache
 
 import (
-	"github.com/open-falcon/hbs/db"
 	"sort"
 	"sync"
+
+	"github.com/open-falcon/hbs/db"
 )
 
 // 一个HostGroup可以绑定多个Plugin
@@ -12,6 +13,7 @@ type SafeGroupPlugins struct {
 	M map[int][]string
 }
 
+// 全局保存组插件信息，key为group id, value为plug路径列表
 var GroupPlugins = &SafeGroupPlugins{M: make(map[int][]string)}
 
 func (this *SafeGroupPlugins) GetPlugins(gid int) ([]string, bool) {
@@ -21,6 +23,7 @@ func (this *SafeGroupPlugins) GetPlugins(gid int) ([]string, bool) {
 	return plugins, exists
 }
 
+// 从数据库获取所有group对应的plug路径列表
 func (this *SafeGroupPlugins) Init() {
 	m, err := db.QueryPlugins()
 	if err != nil {
@@ -34,11 +37,13 @@ func (this *SafeGroupPlugins) Init() {
 
 // 根据hostname获取关联的插件
 func GetPlugins(hostname string) []string {
+	// 获取host id
 	hid, exists := HostMap.GetID(hostname)
 	if !exists {
 		return []string{}
 	}
 
+	// 获取group id
 	gids, exists := HostGroupsMap.GetGroupIds(hid)
 	if !exists {
 		return []string{}
@@ -53,6 +58,7 @@ func GetPlugins(hostname string) []string {
 		}
 
 		for _, plugin := range plugins {
+			// 去重
 			pluginDirs[plugin] = struct{}{}
 		}
 	}
@@ -69,6 +75,7 @@ func GetPlugins(hostname string) []string {
 		i++
 	}
 
+	// 排序
 	sort.Strings(dirs)
 	return dirs
 }

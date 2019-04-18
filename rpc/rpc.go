@@ -13,6 +13,7 @@ import (
 type Hbs int
 type Agent int
 
+// 开启rpc服务
 func Start() {
 	addr := g.Config().Listen
 

@@ -4,6 +4,7 @@ import (
 	"log"
 )
 
+// 查询plugin_dir，获取group id和plug dir的关系
 func QueryPlugins() (map[int][]string, error) {
 	m := make(map[int][]string)
 
